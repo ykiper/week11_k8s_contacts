@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import FastAPI
 from pydantic import BaseModel
 from data_interactor import DataInteractor
@@ -25,6 +27,12 @@ class Item(BaseModel):
     phone_number: str
 
 
+class UpdateItem(BaseModel):
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    phone_number: Optional[str] = None
+
+
 app = FastAPI()
 
 @app.get("/contacts")
@@ -36,15 +44,18 @@ def get_contacts():
 
 @app.post("/contacts")
 def create_contact_API(item: Item):
-    return
+    db = DataInteractor()
+    return db.create_contact(item.model_dump())
 
 
-@app.put("/contacts/{id}")
-def update_contact_API(id: int, item: Item):
-    contact_dict = {'first_name': item.first_name, 'last_name': item.last_name, 'phone_number': item.phone_number}
-    return
+@app.put("/contacts/{phon_number}")
+def update_contact_API(phon_number: str, update_item: UpdateItem):
+    db = DataInteractor()
+    return db.update_contact(phon_number, update_item.model_dump(exclude_unset=True))
 
 
-# @app.delete("/contacts/{id}")
-# def delete_contact_API(id: int):
-#     return
+
+@app.delete("/contacts/{Phone_number}")
+def delete_contact_API(phone_number: str):
+    db = DataInteractor()
+    return db.delete_contact(phone_number)
